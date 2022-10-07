@@ -1,1 +1,4 @@
 node_modules/
+main_js/
+main.r1cs
+.DS_Store

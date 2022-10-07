@@ -1,0 +1,16 @@
+{
+    "name": "randaozkp",
+    "version": "0.0.1",
+    "description": "Attestations to Ethereum block header values",
+    "main": "index.js",
+    "repository": "git@github.com:amangotchu/randaozkp.git",
+    "author": "Aman Gottumukkala <amangotchu@users.noreply.github.com>",
+    "scripts": {
+        "compile": "circom main.circom --r1cs --wasm"
+    },
+    "dependencies": {
+        "circomlib": "^2.0.2",
+        "hardhat": "^2.9.2",
+        "snarkjs": "^0.4.15"
+    }
+}
