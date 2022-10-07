@@ -1,4 +1,12 @@
+# Packages
 node_modules/
+
+# Compilation
 main_js/
 main.r1cs
+
+# Witness Generation
+witness.wtns
+
+# Random
 .DS_Store

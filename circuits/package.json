@@ -6,7 +6,8 @@
     "repository": "git@github.com:amangotchu/randaozkp.git",
     "author": "Aman Gottumukkala <amangotchu@users.noreply.github.com>",
     "scripts": {
-        "compile": "circom main.circom --r1cs --wasm"
+        "compile": "circom main.circom --r1cs --wasm",
+        "gen_witness": "node ./main_js/generate_witness.js ./main_js/main.wasm ./witness_generation/input.json ./witness_generation/witness.wtns"
     },
     "dependencies": {
         "circomlib": "^2.0.2",
