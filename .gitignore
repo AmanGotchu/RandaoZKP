@@ -8,5 +8,15 @@ main.r1cs
 # Witness Generation
 witness.wtns
 
+# Trusted setup
+pot24_final.ptau
+blockheader_0000.zkey
+blockheader_0001.zkey
+verification_key.json
+
+# Proofs
+proof.json
+public.json
+
 # Random
 .DS_Store

@@ -7,7 +7,10 @@
     "author": "Aman Gottumukkala <amangotchu@users.noreply.github.com>",
     "scripts": {
         "compile": "circom main.circom --r1cs --wasm",
-        "gen_witness": "node ./main_js/generate_witness.js ./main_js/main.wasm ./witness_generation/input.json ./witness_generation/witness.wtns"
+        "gen_witness": "node ./main_js/generate_witness.js ./main_js/main.wasm ./witness_generation/input.json ./witness_generation/witness.wtns",
+        "gen_verification_key": "cd ./trusted_setup && ./gen_verification_key.sh && cd ../",
+        "gen_proof": "snarkjs groth16 prove ./trusted_setup/blockheader_0001.zkey ./witness_generation/witness.wtns ./proofs/proof.json ./proofs/public.json",
+        "verify_proof": "snarkjs groth16 verify ./trusted_setup/verification_key.json ./proofs/public.json ./proofs/proof.json"
     },
     "dependencies": {
         "circomlib": "^2.0.2",
