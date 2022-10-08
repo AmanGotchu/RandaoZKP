@@ -110,6 +110,11 @@ const encodeRLP = (blockHeader: object) => {
     Object.values(blockHeaderInputs)
   );
   const derivedBlockHash = ethers.utils.keccak256(rlpEncodedHeader);
+  // fixed size of 112, so pad to 0s
+  // and convert the hex values to integers
+
+  // open an input_{blocknum}.json file
+  // write the array of integers under the key "blockRlpHexs"
 
   console.log("Block Number", number);
   console.log("Mix hash", mixHash);
