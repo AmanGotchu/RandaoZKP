@@ -20,7 +20,3 @@ RUN git clone https://github.com/iden3/circom.git
 
 RUN cd circom && cargo build --release && cargo install --path circom
 
-RUN curl -LJO https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_25.ptau
-
-COPY powersOfTau28_hez_final_25.ptau .
-
