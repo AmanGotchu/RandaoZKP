@@ -36,6 +36,8 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
 
+RUN MKDIR build
+
 EXPOSE 8080
 
 CMD ["bash"]
