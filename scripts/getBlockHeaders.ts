@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import axios from "axios";
 import { write } from "fs";
+// usage: $yarn ts-node getBlockHeaders.ts --blocknum 15705750
 var minimist = require("minimist");
 
 const RLP_LENGTH = 1112;
