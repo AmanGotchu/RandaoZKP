@@ -8,19 +8,34 @@ include "./utils/keccak.circom";
 include "./utils/rlp.circom";
 include "./utils/mpt.circom";
 
+include "../circom-pairing/circuits/bn254/groth16.circom"
+
 // State, TX, Receipts, Number, Parent hash, Mix hash (block randomness)
 template EthBlockHashHex() {
     signal input blockRlpHexs[1112]; // 1112 bytes of RLP encoding
+    signal input baseBit;
 
-    signal output out;
-    signal output blockHashHexs[64]; // 64 is likely just the characters of the hex string
+    // verification key inputs
+    signal input negalfa1xbeta2[6][2][k]; // e(-alfa1, beta2)
+    signal input gamma2[2][2][k];
+    signal input delta2[2][2][k];
+    signal input IC[publicInputCount+1][2][k];
 
+    // proof inputs
+    signal input negpa[2][k];
+    signal input pb[2][2][k];
+    signal input pc[2][k];
+    signal input pubInput[publicInputCount];
+
+    // Outputs
+    signal output out; // Returns 0 or 1
+    signal output blockHashHexs[64];
     signal output numberHexLen;
-
     signal output parentHash[64];
     signal output number[6];
     signal output mixHash[64];
 
+    // Decoding RLP input
     log(555555500001);
     for (var idx = 0; idx < 1112; idx++) {
         log(blockRlpHexs[idx]);
@@ -53,7 +68,6 @@ template EthBlockHashHex() {
     }
     keccak.rounds <== 5 - leq.out;
 
-    out <== rlp.out;
     for (var idx = 0; idx < 32; idx++) {
         blockHashHexs[2 * idx] <== keccak.out[2 * idx + 1];
 	blockHashHexs[2 * idx + 1] <== keccak.out[2 * idx];
@@ -67,8 +81,7 @@ template EthBlockHashHex() {
         number[idx] <== rlp.fields[8][idx];
     }
 
-    // Logging output values
-    log(out);
+    // Logging decoded RLP values
     for (var idx = 0; idx < 64; idx++) {
         log(blockHashHexs[idx]);
     }
@@ -82,4 +95,46 @@ template EthBlockHashHex() {
     for (var idx = 0; idx < 64; idx++) {
         log(mixHash[idx]);
     }
+
+    // Instantiating Groth16 verifier and inputs
+    component groth16Verifier = verifyProof(0);
+    for (var i = 0;i < 6;i++) {
+        for (var j = 0;j < 2;j++) {
+            for (var idx = 0;idx < k2;idx++) {
+                groth16Verifier.negalfa1xbeta2[i][j][idx] <== negalfa1xbeta2[i][j][idx];
+            }
+        }
+    }
+
+    for (var i = 0;i < 2;i++) {
+        for (var j = 0;j < 2;j++) {
+            for (var idx = 0;idx < k2;idx++) {
+                groth16Verifier.gamma2[i][j][idx] <== gamma2[i][j][idx];
+                groth16Verifier.delta2[i][j][idx] <== delta2[i][j][idx];
+                groth16Verifier.IC[i][j][idx] <== IC[i][j][idx];
+                groth16Verifier.pb[i][j][idx] <== pb[i][j][idx];                
+            }
+        }
+    }
+
+    for (var i = 0;i < 2;i++) {
+        for (var idx = 0;idx < k2;idx++) {
+            groth16Verifier.negpa[i][idx] <== negpa[i][idx];
+            groth16Verifier.pc[i][idx] <== pc[i][idx];
+        }
+    }
+    //  groth16Verifier.pubInput[0] <== b;
+    //  Don't think above is needed since pub input = 0
+
+    component baseBitOrVerifierOut = OR();
+    baseBitOrVerifierOut.a <== baseBit;
+    baseBitOrVerifierOut.b <== groth16Verifier.out;
+
+    component processedVerifierOutAndRLPOut = AND();
+    processedVerifierOutAndRLPOut.a <== baseBitOrVerifierOut.out
+    processedVerifierOutAndRLPOut.b <== rlp.out
+
+    // out = rlp_out AND (NOT base_bit OR verifier_out)
+    out <== processedVerifierOutAndRLPOut.out;
+    log(out);
 }
