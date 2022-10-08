@@ -11,11 +11,6 @@ include "./utils/mpt.circom";
 
 // State, TX, Receipts, Number, Parent hash, Mix hash (block randomness)
 template EthBlockHashHex(publicInputCount) {
-    // // ecdsa fact
-    // var n1 = 64;
-    // var k1 = 4;
-
-    // bn254 fact
     var k2 = 6;
 
     signal input blockRlpHexs[1112]; // 1112 bytes of RLP encoding
@@ -143,16 +138,31 @@ template EthBlockHashHex(publicInputCount) {
     }
 
     // TODO(aman): Add check that ensures pubInput's block hash equates to the parent hash of the RLP encoded input
+    component proofBlockHashMatchesCurrentParent = MultiAND(64);
+    component eq[64];
+    for (var i = 0; i<64; i++) {
+        eq[i] = IsEqual();
 
-    component baseBitOrVerifierOut = OR();
-    baseBitOrVerifierOut.a <== baseBit;
-    baseBitOrVerifierOut.b <== groth16Verifier.out;
+        // TODO(aman): Make sure pubInput and parentHash are using the right indexes. Right now they're wrong!
+        eq[i].in[0] <== pubInput[i];
+        eq[i].in[1] <== parentHash[i];
+        proofBlockHashMatchesCurrentParent.in[i] <== eq[i].out;
+    }
+
+    component validVerifier = AND();
+    validVerifier.a <== proofBlockHashMatchesCurrentParent.out;
+    validVerifier.b <== groth16Verifier.out;
+
+    component baseBitOrValidVerifier = OR();
+    baseBitOrValidVerifier.a <== baseBit;
+    baseBitOrValidVerifier.b <== validVerifier.out;
 
     component processedVerifierOutAndRLPOut = AND();
-    processedVerifierOutAndRLPOut.a <== baseBitOrVerifierOut.out;
+    processedVerifierOutAndRLPOut.a <== baseBitOrValidVerifier.out;
     processedVerifierOutAndRLPOut.b <== rlp.out;
+    processedVerifierOutAndRLPOut.out === 1;
 
-    // out = rlp_out AND (NOT base_bit OR verifier_out)
+    // out = rlp_out AND (NOT base_bit OR (verifier_out AND hash_match_out))
     out <== processedVerifierOutAndRLPOut.out;
     log(out);
 }
