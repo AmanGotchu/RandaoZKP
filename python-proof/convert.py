@@ -3,29 +3,23 @@ from py_ecc.fields import (
     bn128_FQ2 as FQ2,
     bn128_FQ12 as FQ12,
 )
-from py_ecc.bn128 import bn128_curve as curve
-from field_helper import (
+from py_ecc.bn128 import bn128_curve as curve, bn128_pairing as pairing
+from utils.field_helper import (
     numberToArray,
-    numberToBase,
-    hamming_weight,
-    printEllipticPoint,
-    printFQ,
-    printFQ2,
     Fp12convert,
-    printFQ12,
-    print_fq12_frobenius_coeff,
 )
 import math
-
-from py_ecc.fields import (
-    bn128_FQ as FQ,
-    bn128_FQ2 as FQ2,
-    bn128_FQ12 as FQ12,
-)
-from py_ecc.bn128 import bn128_curve as curve, bn128_pairing as pairing
 import json
 
-with open("fixtures/vkey-0.json", "r") as vkey_file:
+# Input files
+VKEY_FILE = "fixtures_in/vkey.json"
+PROOF_FILE = "fixtures_in/proof.json"
+PUBLIC_FILE = "fixtures_in/public.json"
+
+# Output files
+CIRCOM_INPUT_FILE = "fixtures_out/circuit_recursive_zkp_input.json"
+
+with open(VKEY_FILE, "r") as vkey_file:
     vkey_data = vkey_file.read()
 vkey = json.loads(vkey_data)
 
@@ -90,7 +84,7 @@ inputParameters = {
 
 print("inputParameters", inputParameters)
 
-with open("fixtures/proof-0.json", "r") as proof_file:
+with open(PROOF_FILE, "r") as proof_file:
     proof_data = proof_file.read()
 proof = json.loads(proof_data)
 
@@ -111,7 +105,7 @@ proofParameters = {
 
 print("proofParameters", proofParameters)
 
-with open("fixtures/public-0.json", "r") as public_file:
+with open(PUBLIC_FILE, "r") as public_file:
     public_data = public_file.read()
 pubInputs = json.loads(public_data)
 
@@ -125,5 +119,5 @@ print("pubParameters", pubParameters)
 
 fullCircomInput = {**inputParameters, **proofParameters, **pubParameters}
 
-with open("fixtures/full-circom-input-0.json", "w") as outfile:
+with open(CIRCOM_INPUT_FILE, "w") as outfile:
     json.dump(fullCircomInput, outfile)
