@@ -12,9 +12,9 @@ import math
 import json
 
 # Input files
-VKEY_FILE = "fixtures_in/vkey.json"
-PROOF_FILE = "fixtures_in/proof.json"
-PUBLIC_FILE = "fixtures_in/public.json"
+VKEY_FILE = "fixtures_in/vkey-in.json"
+PROOF_FILE = "fixtures_in/proof-in.json"
+PUBLIC_FILE = "fixtures_in/public-in.json"
 
 # Output files
 CIRCOM_INPUT_FILE = "fixtures_out/circuit_recursive_zkp_input.json"
