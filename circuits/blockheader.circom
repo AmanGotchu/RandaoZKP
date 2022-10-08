@@ -142,6 +142,8 @@ template EthBlockHashHex(publicInputCount) {
         groth16Verifier.pubInput[i] <== pubInput[i];
     }
 
+    // TODO(aman): Add check that ensures pubInput's block hash equates to the parent hash of the RLP encoded input
+
     component baseBitOrVerifierOut = OR();
     baseBitOrVerifierOut.a <== baseBit;
     baseBitOrVerifierOut.b <== groth16Verifier.out;
