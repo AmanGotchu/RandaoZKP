@@ -1,30 +1,12 @@
 pragma circom 2.0.2;
 
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/comparators.circom";
-include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/bitify.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/comparators.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/multiplexer.circom";
 
 include "./vocdoni-keccak/keccak.circom";
 include "./vocdoni-keccak/permutations.circom";
 include "./vocdoni-keccak/utils.circom";
-
-function min(a, b) {
-    if (a < b) {
-	return a;
-    }
-    return b;
-}
-
-function log_ceil(n) {
-   var n_temp = n;
-   for (var i = 0; i < 254; i++) {
-       if (n_temp == 0) {
-          return i;
-       }
-       n_temp = n_temp \ 2;
-   }
-   return 254;
-}
 
 template Pad0(inLenMin, inLenMax, outLen) {
     assert(inLenMax + 1 <= outLen);
