@@ -1,30 +1,36 @@
 pragma circom 2.0.2;
 
-include "./node_modules/circomlib/circuits/bitify.circom";
-include "./node_modules/circomlib/circuits/comparators.circom";
-include "./node_modules/circomlib/circuits/multiplexer.circom";
+include "../circom-pairing/node_modules/circomlib/circuits/bitify.circom";
+include "../circom-pairing/node_modules/circomlib/circuits/comparators.circom";
+include "../circom-pairing/node_modules/circomlib/circuits/multiplexer.circom";
+include "../circom-pairing/circuits/bn254/groth16.circom";
 
 include "./utils/keccak.circom";
 include "./utils/rlp.circom";
 include "./utils/mpt.circom";
 
-include "../circom-pairing/circuits/bn254/groth16.circom"
-
 // State, TX, Receipts, Number, Parent hash, Mix hash (block randomness)
-template EthBlockHashHex() {
+template EthBlockHashHex(publicInputCount) {
+    // // ecdsa fact
+    // var n1 = 64;
+    // var k1 = 4;
+
+    // bn254 fact
+    var k2 = 6;
+
     signal input blockRlpHexs[1112]; // 1112 bytes of RLP encoding
     signal input baseBit;
 
     // verification key inputs
-    signal input negalfa1xbeta2[6][2][k]; // e(-alfa1, beta2)
-    signal input gamma2[2][2][k];
-    signal input delta2[2][2][k];
-    signal input IC[publicInputCount+1][2][k];
+    signal input negalfa1xbeta2[6][2][k2]; // e(-alfa1, beta2)
+    signal input gamma2[2][2][k2];
+    signal input delta2[2][2][k2];
+    signal input IC[publicInputCount+1][2][k2];
 
     // proof inputs
-    signal input negpa[2][k];
-    signal input pb[2][2][k];
-    signal input pc[2][k];
+    signal input negpa[2][k2];
+    signal input pb[2][2][k2];
+    signal input pc[2][k2];
     signal input pubInput[publicInputCount];
 
     // Outputs
@@ -97,7 +103,7 @@ template EthBlockHashHex() {
     }
 
     // Instantiating Groth16 verifier and inputs
-    component groth16Verifier = verifyProof(0);
+    component groth16Verifier = verifyProof(publicInputCount);
     for (var i = 0;i < 6;i++) {
         for (var j = 0;j < 2;j++) {
             for (var idx = 0;idx < k2;idx++) {
@@ -111,8 +117,15 @@ template EthBlockHashHex() {
             for (var idx = 0;idx < k2;idx++) {
                 groth16Verifier.gamma2[i][j][idx] <== gamma2[i][j][idx];
                 groth16Verifier.delta2[i][j][idx] <== delta2[i][j][idx];
-                groth16Verifier.IC[i][j][idx] <== IC[i][j][idx];
                 groth16Verifier.pb[i][j][idx] <== pb[i][j][idx];                
+            }
+        }
+    }
+
+    for (var i = 0;i < publicInputCount+1;i++) {
+        for (var j = 0;j < 2;j++) {
+            for (var idx = 0;idx < k2;idx++) {
+                groth16Verifier.IC[i][j][idx] <== IC[i][j][idx];        
             }
         }
     }
@@ -123,16 +136,19 @@ template EthBlockHashHex() {
             groth16Verifier.pc[i][idx] <== pc[i][idx];
         }
     }
-    //  groth16Verifier.pubInput[0] <== b;
-    //  Don't think above is needed since pub input = 0
+
+    // Assign previous outputs as verify inputs
+    for (var i = 0; i<publicInputCount; i++) {
+        groth16Verifier.pubInput[i] <== pubInput[i];
+    }
 
     component baseBitOrVerifierOut = OR();
     baseBitOrVerifierOut.a <== baseBit;
     baseBitOrVerifierOut.b <== groth16Verifier.out;
 
     component processedVerifierOutAndRLPOut = AND();
-    processedVerifierOutAndRLPOut.a <== baseBitOrVerifierOut.out
-    processedVerifierOutAndRLPOut.b <== rlp.out
+    processedVerifierOutAndRLPOut.a <== baseBitOrVerifierOut.out;
+    processedVerifierOutAndRLPOut.b <== rlp.out;
 
     // out = rlp_out AND (NOT base_bit OR verifier_out)
     out <== processedVerifierOutAndRLPOut.out;

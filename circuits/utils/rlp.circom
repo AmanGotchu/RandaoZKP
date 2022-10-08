@@ -1,8 +1,8 @@
 pragma circom 2.0.2;
 
-include "../node_modules/circomlib/circuits/bitify.circom";
-include "../node_modules/circomlib/circuits/comparators.circom";
-include "../node_modules/circomlib/circuits/multiplexer.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/bitify.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/comparators.circom";
+include "../../circom-pairing/node_modules/circomlib/circuits/multiplexer.circom";
 
 // selects indices [start, end)
 template SubArray(nIn, maxSelect, nInBits) {
