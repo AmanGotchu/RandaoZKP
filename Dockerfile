@@ -21,6 +21,15 @@ WORKDIR /src/circom-pairing
 COPY ./circom-pairing/package.json ./circom-pairing/yarn.lock ./
 RUN yarn install
 
+# Set up python/pipenv
+RUN pip install pipenv
+RUN apt-get update && apt-get install -y --no-install-recommends gcc
+
+WORKDIR /src/python-proof
+COPY ./python-proof ./
+RUN pipenv shell
+RUN pipenv install
+
 # Set up rest of the repo
 WORKDIR /src
 COPY package.json yarn.lock ./
