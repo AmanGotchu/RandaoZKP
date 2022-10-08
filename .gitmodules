@@ -1,0 +1,3 @@
+[submodule "circom-pairing"]
+	path = circom-pairing
+	url = git@github.com:yi-sun/circom-pairing.git
