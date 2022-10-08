@@ -11,6 +11,12 @@ include "./utils/mpt.circom";
 
 // State, TX, Receipts, Number, Parent hash, Mix hash (block randomness)
 template EthBlockHashHex(publicInputCount) {
+    // this was created by combining Yi Sun's RLP verification proof in
+    // https://github.com/yi-sun/zk-attestor/blob/f4f4b2268f7cf8a0e5ac7f2b5df06a61859f18ca/circuits/rlp.circom
+    // with nawlin's recursive zk snark project Isokratia example code in
+    // https://github.com/nalinbhardwaj/circom-pairing/blob/082e7705a8a384e7c7568944fa216d3eb8d863ed/scripts/recursion/recursion.circom#L5
+
+    // bn254 curve property
     var k2 = 6;
 
     signal input blockRlpHexs[1112]; // 1112 bytes of RLP encoding
