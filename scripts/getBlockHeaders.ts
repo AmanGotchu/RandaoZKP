@@ -5,6 +5,8 @@ import { write } from "fs";
 var minimist = require("minimist");
 
 const RLP_LENGTH = 1112;
+const RPC_API_KEY = "b21f394fcb224f8781403d4bf6caf604";
+const RPC_URL = "https://mainnet.infura.io/v3/";
 
 var args = minimist(process.argv.slice(2), {
   number: ["blocknum"], // --blocknum 2398572498
@@ -13,16 +15,12 @@ var args = minimist(process.argv.slice(2), {
 });
 
 const getBlockHeader = async (blockNumber: bigint | null) => {
-  console.log(`getting block header ${blockNumber}`);
-  return axios.post(
-    "https://mainnet.infura.io/v3/b21f394fcb224f8781403d4bf6caf604",
-    {
-      jsonrpc: "2.0",
-      id: 0,
-      method: "eth_getBlockByNumber",
-      params: [blockNumber ? "0x" + blockNumber.toString(16) : "latest", false],
-    }
-  );
+  return axios.post(`${RPC_URL}${RPC_API_KEY}`, {
+    jsonrpc: "2.0",
+    id: 0,
+    method: "eth_getBlockByNumber",
+    params: [blockNumber ? "0x" + blockNumber.toString(16) : "latest", false],
+  });
 };
 
 const getLatestBlock = async () => {
@@ -138,9 +136,6 @@ const encodeRLP = (blockHeaderResp: any) => {
   const rlpEncodedHeader = ethers.utils.RLP.encode(
     Object.values(blockHeaderInputs)
   );
-
-  console.log(blockHeaderInputs);
-  console.log(rlpEncodedHeader);
 
   return rlpEncodedHeader;
 };
