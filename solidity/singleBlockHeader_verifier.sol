@@ -16,7 +16,7 @@
 // snarkjs zkey export solidityverifier "$BUILD_DIR"/"$CIRCUIT_NAME".zkey "$BUILD_DIR"/"$CIRCUIT_NAME"_verifier.sol
 // in /src/circuits, as part of `build_single_block.sh`
 
-pragma solidity ^0.6.11;
+pragma solidity ^0.8.13;
 
 library Pairing {
     struct G1Point {
