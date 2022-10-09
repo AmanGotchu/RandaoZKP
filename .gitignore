@@ -1,5 +1,7 @@
 # Packages
 node_modules/
+cache
+out
 */node_modules/
 
 # Compilation
