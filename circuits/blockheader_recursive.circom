@@ -12,7 +12,6 @@ include "./utils/mpt.circom";
 // Recursive ZKP of block header values
 template EthBlockHashHexRecursive(publicInputCount) {
     var k2 = 6;
-    var publicInputCount = 130; // TODO(aman): Figure out exactly what this is for new circuit
 
     signal input iter; // Keeps track of recursion depth
     signal input proofBlockHashHexs[64]; // Overall block header we're proving
@@ -38,7 +37,7 @@ template EthBlockHashHexRecursive(publicInputCount) {
     iterOut <== iter + 1;
 
     signal output proofBlockHashHexsOut[64]; // Overall block hash we're proving for
-    for (var idx = 0; idx < 64; i++) {
+    for (var idx = 0; idx < 64; idx++) {
         proofBlockHashHexsOut[idx] <== proofBlockHashHexs[idx];
     }
 
@@ -63,7 +62,7 @@ template EthBlockHashHexRecursive(publicInputCount) {
     }
 
     // if leq.out == 1, use 4 rounds, else use 5 rounds
-    component leq = LessEqThanLessThan(13);
+    component leq = LessEqThan(13);
     leq.in[0] <== blockRlpHexLen + 1;
     // 4 * blockSize = 1088
     leq.in[1] <== 1088;
@@ -80,18 +79,9 @@ template EthBlockHashHexRecursive(publicInputCount) {
 	blockHashHexs[2 * idx + 1] <== keccak.out[2 * idx];
     }
 
-    component parentHash[64];
-    for (var idx = 0; idx < 64; idx++) {
-        parentHash[idx] <== rlp.fields[0][idx];
-    }
-
     // Logging decoded RLP values
     for (var idx = 0; idx < 64; idx++) {
         log(blockHashHexs[idx]);
-    }
-
-    for (var idx = 0; idx < 64; idx++) {
-        log(parentHash[idx]);
     }
 
     // Instantiating Groth16 verifier and inputs
@@ -143,7 +133,7 @@ template EthBlockHashHexRecursive(publicInputCount) {
         // Verifies current parent hash matches proof's block hash
         eq[2*i] = IsEqual();
         eq[2*i].in[0] <== pubInput[1+i];
-        eq[2*i].in[1] <== parentHash[i];
+        eq[2*i].in[1] <== rlp.fields[0][i]; // Extracts parent hash from RLP encoding
         proofValidation.in[2*i] <== eq[2*i].out;
 
         // Verifies that the proof is proving the same overall block as this circuit
@@ -160,12 +150,12 @@ template EthBlockHashHexRecursive(publicInputCount) {
     validVerifier.a <== proofValidation.out;
     validVerifier.b <== groth16Verifier.out;
 
-    component baseBitOrValidVerifier = OR();
-    baseBitOrValidVerifier.a <== baseBit;
-    baseBitOrValidVerifier.b <== validVerifier.out;
+    component baseCaseOrValidVerifier = OR();
+    baseCaseOrValidVerifier.a <== iter;
+    baseCaseOrValidVerifier.b <== validVerifier.out;
 
     component processedVerifierOutAndRLPOut = AND();
-    processedVerifierOutAndRLPOut.a <== baseBitOrValidVerifier.out;
+    processedVerifierOutAndRLPOut.a <== baseCaseOrValidVerifier.out;
     processedVerifierOutAndRLPOut.b <== rlp.out;
     processedVerifierOutAndRLPOut.out === 1;
 
@@ -174,4 +164,4 @@ template EthBlockHashHexRecursive(publicInputCount) {
     log(out);
 }
 
-component main = EthBlockHashHexRecursive();
+component main = EthBlockHashHexRecursive(130);
