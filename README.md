@@ -1,7 +1,7 @@
 # EthBogota Hackathon October 2022 - on chain verification of block hashes
 
 ## Motivation
-Valid historical block hashes are flexible for attestations - they characterize block headers which include (among other things) the `state trie` root, which can be used to make claims about historical state.  We focus on block header `RanDAO` values in the `mixHash` field for RNG generation as a first concrete use case.
+Valid historical block hashes are flexible for attestations - they characterize block headers which include (among other things) the `state trie` root, which can be used to make claims about historical state.  For concreteness our project brings `RanDAO` values in the `mixHash` block header for on-chain RNG generation, but many downstream applications can benefit from having a validated registry of block hashes.
 
 On-chain randomness in ethereum is difficult because of potential manipulation via inclusion/exclusion by proposers and the transparent nature of the blockchain data and algorithms.  Many projects rely on Chainlink’s VRF as an external trusted source of randomness, but it can be time consuming to integrate and introduces external trust assumptions.
 
@@ -12,7 +12,6 @@ Recursive zk-SNARKs can provide succinct verification that the block header/RanD
 This repository includes circom contracts for verifying block headers. Our simple demo circuit outputs the block hash for
 a given block header,.  We have work in progress to generate recursive zk-SNARKs for posting arbitrarily old block hashes in constant on chain compute/storage.
 
-
 ## Circom Circuits
 Consistent with block hash calcaultion, our circuits expect the block header [RLP](https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/) to be encoded as a sequence of `1112` hex values, which are then hashed and then validated against the next block header's `parentHash` field.
 
@@ -20,9 +19,9 @@ Our approach benefits from the fact that the most recent 256 block hashes are av
 execution environment, allowing some recent hash to be committed/confirmed to the state history without additional verification.
 
 Our WIP recursive zk-SNARKs can then choose a given historical block hash and generate a proof linking it to the known recent hash,
-by validating the entire history of block hashes in between (via the parentHash field present in each block header).
+by validating the entire history of block hashes in between (linking blocks via the `parentHash` block header field).
 
-Since we are only attesting the RanDAO values and black hashes, the remainder block header values can be treated as private input (part of the witness) for our circuit.  This will help keep proof size (and on-chain state) small. 
+Since we are only attesting the RanDAO values and black hashes, the remainder block header values can be treated as private input (part of the witness) for the circuits.  This helps keep proof size (and on-chain state) small. 
 
 We are fortunate that RLP, SHA256 and one curve pairing have open source implementations in circom.
 
