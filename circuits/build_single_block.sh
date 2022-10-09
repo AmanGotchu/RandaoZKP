@@ -4,6 +4,7 @@
 
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
+COMPILED_DIR=../compiled_circuit/
 TRUSTED_SETUP_DIR=../trusted_setup/
 
 CIRCUIT_NAME=singleBlockHeader
@@ -13,57 +14,63 @@ if [ ! -d "$BUILD_DIR" ]; then
     mkdir "$BUILD_DIR"
 fi
 
+if [ ! -d "$COMPILED_DIR" ]; then
+    echo "No compiled directory found. Creating build directory..."
+    mkdir "$COMPILED_DIR"
+fi
+
 echo $PWD
 
-if [ -f "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs ]; then
+if [ ! -f "$COMPILED_DIR"/"$CIRCUIT_NAME".r1cs ]; then
     echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
     start=`date +%s`
-    circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
+    circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$COMPILED_DIR"
     end=`date +%s`
     echo "DONE ($((end-start))s)"
 fi
 
 echo "****GENERATING WITNESS FOR SAMPLE INPUT****"
+echo "$BUILD_DIR/input.json"
 start=`date +%s`
-node "$BUILD_DIR"/"$CIRCUIT_NAME"_js/generate_witness.js \
-    "$BUILD_DIR"/"$CIRCUIT_NAME"_js/"$CIRCUIT_NAME".wasm ../scripts/input_15705750.json \
+node "$COMPILED_DIR"/"$CIRCUIT_NAME"_js/generate_witness.js \
+    "$COMPILED_DIR"/"$CIRCUIT_NAME"_js/"$CIRCUIT_NAME".wasm "$BUILD_DIR"/input.json \
     "$BUILD_DIR"/witness.wtns
 end=`date +%s`
 echo "DONE ($((end-start))s)"
 
-if [ -f "$PHASE1" ]; then
-    echo "Found Phase 1 ptau file"
-else
-    echo "No Phase 1 ptau file found. Exiting..."
-    exit 1
-fi
+# if [ -f "$PHASE1" ]; then
+#     echo "Found Phase 1 ptau file"
+# else
+#     echo "No Phase 1 ptau file found. Exiting..."
+#     exit 1
+# fi
 
 # these need powers of tau...
-if test ! -f "$TRUSTED_SETUP_DIR/vkey.json"; then
-    echo "****GENERATING ZKEY 0****"
-    start=`date +%s`
-    NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs groth16 setup "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs "$PHASE1" "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME"_0.zkey
-    end=`date +%s`
-    echo "DONE ($((end-start))s)"
+# if test ! -f "$TRUSTED_SETUP_DIR/vkey.json"; then
+#     echo "****GENERATING ZKEY 0****"
+#     start=`date +%s`
+#     NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs groth16 setup "$COMPILED_DIR"/"$CIRCUIT_NAME".r1cs "$PHASE1" "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME"_0.zkey
+#     end=`date +%s`
+#     echo "DONE ($((end-start))s)"
 
-    echo "****GENERATING FINAL ZKEY****"
-    start=`date +%s`
-    NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey beacon "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME"_0.zkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey 0102030405060708090a0b0c0d0e0f101112231415161718221a1b1c1d1e1f 10 -n="Final Beacon phase2"
-    end=`date +%s`
-    echo "DONE ($((end-start))s)"
+#     echo "****GENERATING FINAL ZKEY****"
+#     start=`date +%s`
+#     NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey beacon "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME"_0.zkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey 0102030405060708090a0b0c0d0e0f101112231415161718221a1b1c1d1e1f 10 -n="Final Beacon phase2"
+#     end=`date +%s`
+#     echo "DONE ($((end-start))s)"
 
-    echo "****VERIFYING FINAL ZKEY****"
-    start=`date +%s`
-    NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey verify -verbose "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs "$PHASE1" "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey
-    end=`date +%s`
-    echo "DONE ($((end-start))s)"
+#     echo "****VERIFYING FINAL ZKEY****"
+#     start=`date +%s`
+#     NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey verify -verbose "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs "$PHASE1" "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey
+#     end=`date +%s`
+#     echo "DONE ($((end-start))s)"
 
-    echo "****EXPORTING VKEY****"
-    start=`date +%s`
-    npx snarkjs zkey export verificationkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey "$TRUSTED_SETUP_DIR"/vkey.json
-    end=`date +%s`
-    echo "DONE ($((end-start))s)"
-fi
+#     echo "****EXPORTING VKEY****"
+#     start=`date +%s`
+#     npx snarkjs zkey export verificationkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey "$TRUSTED_SETUP_DIR"/vkey.json
+#     end=`date +%s`
+#     echo "DONE ($((end-start))s)"
+# fi
 
 echo "****GENERATING PROOF FOR SAMPLE INPUT****"
 start=`date +%s`
@@ -78,7 +85,7 @@ end=`date +%s`
 echo "DONE ($((end-start))s)"
 
 # generate the solidity verifier contract
-snarkjs zkey export solidityverifier "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey "$BUILD_DIR"/"$CIRCUIT_NAME"_verifier.sol
+snarkjs zkey export solidityverifier "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey "$COMPILED_DIR"/"$CIRCUIT_NAME"_verifier.sol
 
 # output the correct smart contract inputs
-snarkjs zkey export soliditycalldata public.json proof.json > "$BUILD_DIR"/calldata.txt
+snarkjs zkey export soliditycalldata "$BUILD_DIR"/public.json "$BUILD_DIR"/proof.json > "$BUILD_DIR"/calldata.txt

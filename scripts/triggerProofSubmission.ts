@@ -26,9 +26,12 @@ export const poke = async () => {
 }
 
 export const triggerProofSubmission = async (blockNum: number) => {
+    dotenv.config({
+        path: "../.env"
+    })
     // Block header write
     console.log("Writing block header!");
-    writeBlockHeaderRLP(blockNum);
+    await writeBlockHeaderRLP(blockNum);
 
     // Proof orchestration
     console.log("Running proof generation orchestration!");
@@ -50,7 +53,7 @@ export const triggerProofSubmission = async (blockNum: number) => {
     const calldata = JSON.parse("[" + fs.readFileSync(calldataPath).toString() + "]");
     let { RPC_URL, PV_KEY } = process.env;
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-    const signer = new ethers.Wallet(PV_KEY!, provider);
+    const signer = new ethers.Wallet("0x93bf309c2c473731ce11cb548b8986c19660e81f70459b6150b20b55f5413f1a", provider);
     const verifierContract = new ethers.Contract(
         "0x948279128B8F7b62cb9C6Bfce0905aFba9cbd116",
         new ethers.utils.Interface([
@@ -60,7 +63,6 @@ export const triggerProofSubmission = async (blockNum: number) => {
         signer
     );
     verifierContract.connect(signer);
-
     const aIn = calldata[0];
     const bIn = calldata[1];
     const cIn = calldata[2];
@@ -69,7 +71,10 @@ export const triggerProofSubmission = async (blockNum: number) => {
     const res = await verifierContract.prove(aIn, bIn, cIn, pubIn, {
         gasLimit: 20000000
     })
+    console.log("Submitted Transaction");
     const tx = await res.wait();
     console.log("Transaction submitted!");
     return tx;
 }
+
+triggerProofSubmission(7739550);

@@ -4,10 +4,12 @@ pragma solidity ^0.8.13;
 import "../singleBlockHeader_verifier.sol";
 
 error InvalidProof();
-error InvalidAnchorHash(bytes32 anchorHash);
+error InvalidBlockHash(bytes32 blockHash);
+error LinksUnavailable(bytes32 blockHash, uint256 blockNum);
 
 contract BlockHashRegistry is Verifier {
     mapping(uint256 => bytes32) public numToHash;
+    mapping(uint256 => bytes32) public numToParentHash;
     mapping(uint256 => bytes32) public numToRandMix;
 
     constructor() {
@@ -17,9 +19,20 @@ contract BlockHashRegistry is Verifier {
     function setEntry(
         uint256 blockNum,
         bytes32 blockHash,
+        bytes32 parentHash
+    ) internal {
+        numToHash[blockNum] = blockHash;
+        numToParentHash[blockNum] = parentHash;
+    }
+
+    function sentEntryRandao(
+        uint256 blockNum,
+        bytes32 blockHash,
+        bytes32 parentHash,
         bytes32 randMix
     ) internal {
         numToHash[blockNum] = blockHash;
+        numToParentHash[blockNum] = parentHash;
         numToRandMix[blockNum] = randMix;
     }
 
@@ -27,7 +40,7 @@ contract BlockHashRegistry is Verifier {
         setEntry(
             block.number - 1,
             blockhash(block.number - 1),
-            bytes32(block.difficulty)
+            blockhash(block.number - 2)
         );
     }
 
@@ -43,10 +56,10 @@ contract BlockHashRegistry is Verifier {
         // Parse what we care about from the input.
         uint256 i = 0;
         // First 64 entries are anchorHash.
-        bytes32 anchorHash;
+        bytes32 blockHash;
         for (; i < 64; i++) {
-            anchorHash <<= 4;
-            anchorHash |= bytes32(input[i]);
+            blockHash <<= 4;
+            blockHash |= bytes32(input[i]);
         }
         // Next 64 are parentHash.
         bytes32 parentHash;
@@ -54,24 +67,50 @@ contract BlockHashRegistry is Verifier {
             parentHash <<= 4;
             parentHash |= bytes32(input[i]);
         }
-        // Next 6 are parentBlockNum.
-        bytes32 parentBlockNumAccumulator;
+        // Next 6 are blockNum.
+        bytes32 blockNumAccumulator;
         for (; i < 134; i++) {
-            parentBlockNumAccumulator <<= 4;
-            parentBlockNumAccumulator |= bytes32(input[i]);
+            blockNumAccumulator <<= 4;
+            blockNumAccumulator |= bytes32(input[i]);
         }
-        uint256 parentBlockNum = uint256(parentBlockNumAccumulator);
+        uint256 blockNum = uint256(blockNumAccumulator);
         // Next 64 are mixHash.
-        bytes32 parentMixHash;
+        bytes32 blockMixHash;
         for (; i < 198; i++) {
-            parentMixHash <<= 4;
-            parentMixHash |= bytes32(input[i]);
+            blockMixHash <<= 4;
+            blockMixHash |= bytes32(input[i]);
         }
-        // Set the new hash.
-        if (numToHash[parentBlockNum + 1] != anchorHash) {
-            revert InvalidAnchorHash(anchorHash);
+
+        // Check current block
+        if (numToHash[blockNum] != 0) {
+            if (numToHash[blockNum] == blockHash) {
+                sentEntryRandao(blockNum, blockHash, parentHash, blockMixHash);
+                return;
+            }
+
+            revert InvalidBlockHash(blockHash);
         }
-        setEntry(parentBlockNum, parentHash, parentMixHash);
+
+        // Check parent block.
+        if (numToHash[blockNum - 1] != 0) {
+            if (numToHash[blockNum - 1] == parentHash) {
+                sentEntryRandao(blockNum, blockHash, parentHash, blockMixHash);
+                return;
+            }
+
+            revert InvalidBlockHash(blockHash);
+        }
+
+        // Check child block.
+        if (numToParentHash[blockNum + 1] != 0) {
+            if (numToParentHash[blockNum + 1] == blockHash) {
+                sentEntryRandao(blockNum, blockHash, parentHash, blockMixHash);
+                return;
+            }
+
+            revert InvalidBlockHash(blockHash);
+        }
+
+        revert LinksUnavailable(blockHash, blockNum);
     }
 }
-
