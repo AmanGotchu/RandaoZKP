@@ -4,57 +4,72 @@ import fs from 'fs';
 import { BigNumber, ethers } from "ethers";
 import * as dotenv from 'dotenv'
 
-const triggerProofSubmission = async () => {
-    dotenv.config({path: "../.env"});
+export const poke = async () => {
+    let { RPC_URL, PV_KEY } = process.env;
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const signer = new ethers.Wallet(PV_KEY!, provider);
+    const verifierContract = new ethers.Contract(
+        "0x948279128B8F7b62cb9C6Bfce0905aFba9cbd116",
+        new ethers.utils.Interface([
+            `function prove(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[198] memory input) public`,
+            `function poke() public`
+        ]),
+        signer
+    );
+    verifierContract.connect(signer);
 
-    const blockNum = 101;
-    const build_dir = `./proofstuff_${blockNum}`;
+    const tx = await verifierContract.poke({
+        gasLimit: 1_000_000
+    });
+    const res = await tx.wait();
+    return res;
+}
 
-    // // Block header write
+export const triggerProofSubmission = async (blockNum: number) => {
+    // Block header write
+    console.log("Writing block header!");
     writeBlockHeaderRLP(blockNum);
 
-    // // Proof orchestration
-    let output = execSync(  './generateProof.sh',{encoding: 'utf-8', env: {
+    // Proof orchestration
+    console.log("Running proof generation orchestration!");
+    let output = execSync('./generateProof.sh',{encoding: 'utf-8', env: {
         BLOCK_NUM: blockNum + "",
         BUILD_DIR: `../scripts/proofstuff_${blockNum}`,
         PATH: process.env.PATH
     }});
     console.log('Output was:\n', output);
 
-    // Construct proof submission and send ethers transaction
-    const proofFilePath = `${build_dir}/proof.json`;
-    const publicFilePath = `${build_dir}/public.json`;
+    console.log("Constructing calldata for proof submission!");
 
-    if (!fs.existsSync(proofFilePath) || !fs.existsSync(publicFilePath)) {
-        throw new Error("Proof or public json files don't exist!");
+    const calldataPath = `../scripts/proofstuff_${blockNum}/calldata.txt`;
+    if (!fs.existsSync(calldataPath)) {
+        throw new Error("Calldata path doesn't exist!");
     }
 
-    const proofData = JSON.parse(fs.readFileSync(proofFilePath).toString());
-    const publicData = JSON.parse(fs.readFileSync(publicFilePath).toString());
-
-    const aIn: BigNumber[] = [BigNumber.from(proofData.pi_a[0]), BigNumber.from(proofData.pi_a[1])];
-    const bIn: BigNumber[][] = [[BigNumber.from(proofData.pi_b[0][0]), BigNumber.from(proofData.pi_b[0][0])],[BigNumber.from(proofData.pi_b[1][0]),BigNumber.from(proofData.pi_b[1][1])]];
-    const cIn: BigNumber[] = [proofData.pi_c[0], proofData.pi_c[1]];
-
-    const pubIn: BigNumber[] = publicData.map((data: number) => {
-        return BigNumber.from(data);
-    })
-
-    // Contract call
-    let { RPC_URL, RPC_API_KEY } = process.env;
-    const endpoint = `${RPC_URL}${RPC_API_KEY}`;
-
-    const provider = new ethers.providers.JsonRpcProvider(endpoint);
-    const faucetContract = new ethers.Contract(
-        "faucetContractAddress",
+    console.log("Calling contract!");
+    const calldata = JSON.parse("[" + fs.readFileSync(calldataPath).toString() + "]");
+    let { RPC_URL, PV_KEY } = process.env;
+    const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+    const signer = new ethers.Wallet(PV_KEY!, provider);
+    const verifierContract = new ethers.Contract(
+        "0x948279128B8F7b62cb9C6Bfce0905aFba9cbd116",
         new ethers.utils.Interface([
-            `function verifyProof(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[198] memory input) public view returns (bool r)`,
+            `function prove(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[198] memory input) public`,
+            `function poke() public`
         ]),
-        provider
+        signer
     );
+    verifierContract.connect(signer);
 
-    const res = await faucetContract.verifyProof(aIn, bIn, cIn, pubIn);
-    console.log("Verify proof result:", res);
+    const aIn = calldata[0];
+    const bIn = calldata[1];
+    const cIn = calldata[2];
+    const pubIn = calldata[3];
+
+    const res = await verifierContract.prove(aIn, bIn, cIn, pubIn, {
+        gasLimit: 20000000
+    })
+    const tx = await res.wait();
+    console.log("Transaction submitted!");
+    return tx;
 }
-
-triggerProofSubmission();
