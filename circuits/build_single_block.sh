@@ -3,6 +3,7 @@
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
 TRUSTED_SETUP_DIR=../trusted_setup/
+
 CIRCUIT_NAME=singleBlockHeader
 
 if [ ! -d "$BUILD_DIR" ]; then
