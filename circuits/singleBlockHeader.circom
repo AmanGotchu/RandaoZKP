@@ -1,10 +1,5 @@
 pragma circom 2.0.2;
 
-include "../circom-pairing/node_modules/circomlib/circuits/bitify.circom";
-include "../circom-pairing/node_modules/circomlib/circuits/comparators.circom";
-include "../circom-pairing/node_modules/circomlib/circuits/multiplexer.circom";
-include "../circom-pairing/circuits/bn254/groth16.circom";
-
 include "./utils/keccak.circom";
 include "./utils/rlp.circom";
 include "./utils/mpt.circom";

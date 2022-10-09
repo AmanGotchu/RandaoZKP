@@ -57,8 +57,9 @@ const writeBlockHeaderRLP = async (blocknum: bigint) => {
 
   const output = {
     rlpHexEncoded: rlpHexEncoded,
-    baseBit: args.is_base ? 1 : 0,
+    //    baseBit: args.is_base ? 1 : 0,
   };
+  console.log(output);
   const jsonfile = require("jsonfile");
 
   const file = `input_${blocknum}.json`;
@@ -136,6 +137,14 @@ const encodeRLP = (blockHeaderResp: any) => {
   const rlpEncodedHeader = ethers.utils.RLP.encode(
     Object.values(blockHeaderInputs)
   );
+
+  const derivedBlockHash = ethers.utils.keccak256(rlpEncodedHeader);
+
+  console.log("=========================");
+  console.log("Block Number", number);
+  console.log("Mix hash", mixHash);
+  console.log("RLP Derived Block Hash", derivedBlockHash);
+  console.log("Actual Block Hash", hash);
 
   return rlpEncodedHeader;
 };
