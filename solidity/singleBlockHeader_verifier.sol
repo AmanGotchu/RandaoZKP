@@ -12,10 +12,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0
 
-// this was generated in our docker image by running this command
-// snarkjs zkey export solidityverifier "$BUILD_DIR"/"$CIRCUIT_NAME".zkey "$BUILD_DIR"/"$CIRCUIT_NAME"_verifier.sol
-// in /src/circuits, as part of `build_single_block.sh`
-
 pragma solidity ^0.8.13;
 
 library Pairing {
