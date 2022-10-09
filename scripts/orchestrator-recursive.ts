@@ -1,4 +1,6 @@
 /*
+    TODO(aman): Create orchestrator contract for recursive ZKP circuit inputs.
+
     1. Input blocks we want to prove
 
     Run for each block
@@ -11,10 +13,3 @@
     5. Store proof somewhere such that it can be fed into Step 2.
     6. The last proof is the one we post! This proof proves that the public data (output) is tied to the block we're proving!
 */
-
-const main = function(desiredBlockHeight: number, checkpointBlockHeight: number) {
-    // Need to provide proofs all the way to checkpointBlock inclusive
-    for (let block = desiredBlockHeight; block <= checkpointBlockHeight; block++) {
-        
-    }
-}
