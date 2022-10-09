@@ -90,3 +90,5 @@ template SingleEthBlockHashHex(publicInputCount) {
         log(mixHash[idx]);
     }
  }
+
+component main = SingleEthBlockHashHex(1112);
