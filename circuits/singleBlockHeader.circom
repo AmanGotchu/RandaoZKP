@@ -31,8 +31,8 @@ template SingleEthBlockHashHex(publicInputCount) {
 
     // thank you Yi
     component rlp = RlpArrayCheck(1112, 16, 4,
-        	      	    	  [64, 64, 40, 64, 64, 64, 512,  0, 0, 0, 0, 0,  0, 64, 16,  0],
-				  [64, 64, 40, 64, 64, 64, 512, 14, 6, 8, 8, 8, 64, 64, 18, 10]);
+                [64, 64, 40, 64, 64, 64, 512,  0, 0, 0, 0, 0,  0, 64, 16,  0],
+				[64, 64, 40, 64, 64, 64, 512, 14, 6, 8, 8, 8, 64, 64, 18, 10]);
     for (var idx = 0; idx < 1112; idx++) {
     	rlp.in[idx] <== blockRlpHexs[idx];
     }  // helper for grabbing specific key/values from the RLP
