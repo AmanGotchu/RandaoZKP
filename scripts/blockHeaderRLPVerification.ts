@@ -1,10 +1,14 @@
 import { ethers } from 'ethers';
 import axios from 'axios';
+import * as dotenv from 'dotenv';
 
 const verifyRLPEncoding = async () => {
+    dotenv.config({
+        path: "../.env"
+    })
     const { height } = require('minimist')(process.argv.slice(2));
 
-    const block: any = await axios.post('https://goerli.infura.io/v3/b21f394fcb224f8781403d4bf6caf604', {
+    const block: any = await axios.post(process.env.RPC_URL!, {
         "jsonrpc":"2.0",
         "id":0,
         "method":"eth_getBlockByNumber",
@@ -34,9 +38,6 @@ const verifyRLPEncoding = async () => {
         hash // For comparison afterwards
     } = block.data.result;
 
-    console.log("Mix Hash:", mixHash);
-    console.log("Difficulty:", difficulty);
-
     // Construct bytes like input to RLP encode function
     const blockHeaderInputs: {[key: string]: string} = {
         parentHash,
@@ -56,7 +57,7 @@ const verifyRLPEncoding = async () => {
         nonce,
     }
 
-    const LONDON_HARDFORK_BLOCK = 5062605;
+    const LONDON_HARDFORK_BLOCK = 5062605; // Goerli
     if (number > LONDON_HARDFORK_BLOCK) {
         blockHeaderInputs['baseFeePerGas'] = baseFeePerGas;
     }

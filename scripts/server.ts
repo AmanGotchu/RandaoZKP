@@ -11,13 +11,12 @@ app.get('/generateProof', async (req: any, res: any) => {
   console.log("Generating proof!");
 
   try {
-    // console.log("Poking block");
-    // const tx = await poke();
-    // const existingBlockNumber = tx.blockNumber;
-    // console.log("Block number poked", tx.blockNumber);
+    console.log("Poking block");
+    const tx = await poke();
+    const blockToProve = tx.blockNumber;
+    console.log("Block number poked", blockToProve);
 
-    const blockToProve = 77395932;
-    console.log(`Generating prove for block ${blockToProve}`)
+    console.log(`Generating proof for block ${blockToProve}`)
     await triggerProofSubmission(blockToProve);
 
     res.status(200).send(`Successfully proved block ${blockToProve}`)
