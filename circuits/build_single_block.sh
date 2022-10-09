@@ -33,6 +33,7 @@ end=`date +%s`
 echo "DONE ($((end-start))s)"
 
 # TODO(sina) everything below this)
+# these need powers of tau...
 exit 0
 
 echo "****GENERATING ZKEY 0****"
