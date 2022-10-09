@@ -1,6 +1,5 @@
 import { ethers } from "ethers";
 import axios from "axios";
-import * as dotenv from 'dotenv'
 import fs from 'fs';
 
 // usage: $yarn ts-node getBlockHeaders.ts --blocknum 15705750
@@ -9,7 +8,6 @@ var minimist = require("minimist");
 const RLP_LENGTH = 1112;
 
 export const writeBlockHeaderRLP = async (blocknum: number) => {
-  dotenv.config({path: "../.env"});
   let { RPC_URL, RPC_API_KEY } = process.env;
   RPC_URL = RPC_URL || "https://mainnet.infura.io/v3/";
 

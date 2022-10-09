@@ -1,13 +1,12 @@
 import { execSync } from "child_process";
 import { writeBlockHeaderRLP } from "./getBlockHeaders";
 import fs from 'fs';
-import { BigNumber } from "ethers";
+import { BigNumber, ethers } from "ethers";
+import * as dotenv from 'dotenv'
 
-const sendProofTx = () => {
+const triggerProofSubmission = async () => {
+    dotenv.config({path: "../.env"});
 
-}
-
-const triggerProofSubmission = () => {
     const blockNum = 101;
     const build_dir = `./proofstuff_${blockNum}`;
 
@@ -42,6 +41,20 @@ const triggerProofSubmission = () => {
     })
 
     // Contract call
+    let { RPC_URL, RPC_API_KEY } = process.env;
+    const endpoint = `${RPC_URL}${RPC_API_KEY}`;
+
+    const provider = new ethers.providers.JsonRpcProvider(endpoint);
+    const faucetContract = new ethers.Contract(
+        "faucetContractAddress",
+        new ethers.utils.Interface([
+            `function verifyProof(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[198] memory input) public view returns (bool r)`,
+        ]),
+        provider
+    );
+
+    const res = await faucetContract.verifyProof(aIn, bIn, cIn, pubIn);
+    console.log("Verify proof result:", res);
 }
 
 triggerProofSubmission();
