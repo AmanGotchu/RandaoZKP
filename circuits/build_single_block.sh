@@ -80,6 +80,5 @@ echo "DONE ($((end-start))s)"
 # generate the solidity verifier contract
 snarkjs zkey export solidityverifier "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey "$BUILD_DIR"/"$CIRCUIT_NAME"_verifier.sol
 
-# very important: to convert the exported proof into calldata format expected by the verifier, run
-# snarkjs zkey export soliditycalldata public.json proof.json
-# don't waste hours trying to manually format the calldata like we did, because you missed that line in the SnarkJS documentation.
+# output the correct smart contract inputs
+snarkjs zkey export soliditycalldata public.json proof.json > "$BUILD_DIR"/calldata.txt
