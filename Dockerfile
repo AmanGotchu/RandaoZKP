@@ -2,7 +2,7 @@ FROM node:16-buster@sha256:b35e76ba744a975b9a5428b6c3cde1a1cf0be53b246e1e9a4874f
 
 # Set up basic system utils
 RUN apt update && apt upgrade && apt install curl
-RUN apt install build-essential libgmp-dev libsodium-dev nasm nlohmann-json3-dev
+RUN apt install build-essential libgmp-dev libsodium-dev nasm nlohmann-json3-dev vim
 
 # Set up rust
 RUN curl https://sh.rustup.rs -sSf | \

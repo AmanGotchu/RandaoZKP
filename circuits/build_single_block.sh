@@ -71,3 +71,6 @@ start=`date +%s`
 npx snarkjs groth16 verify "$BUILD_DIR"/vkey.json "$BUILD_DIR"/public.json "$BUILD_DIR"/proof.json
 end=`date +%s`
 echo "DONE ($((end-start))s)"
+
+# generate the solidity verifier contract
+snarkjs zkey export solidityverifier "$BUILD_DIR"/"$CIRCUIT_NAME".zkey "$BUILD_DIR"/"$CIRCUIT_NAME"_verifier.sol
