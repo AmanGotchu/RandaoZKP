@@ -1,5 +1,7 @@
 #!/bin/bash
 
+compile_r1cs=false
+
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
 TRUSTED_SETUP_DIR=../trusted_setup/
@@ -13,11 +15,13 @@ fi
 
 echo $PWD
 
-echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
-start=`date +%s`
-circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
-end=`date +%s`
-echo "DONE ($((end-start))s)"
+if [ "$compile_r1cs" = true ]; then
+    echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
+    start=`date +%s`
+    circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
+    end=`date +%s`
+    echo "DONE ($((end-start))s)"
+fi
 
 echo "****GENERATING WITNESS FOR SAMPLE INPUT****"
 start=`date +%s`
