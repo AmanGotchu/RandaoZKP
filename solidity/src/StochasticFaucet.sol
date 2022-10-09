@@ -35,7 +35,7 @@ contract StochasticFaucet {
         batchBlock = block.number - offset + BATCH_INTERVAL_SIZE;
     }
 
-    function join() public payable {
+    function bet() public payable {
         if (bets[msg.sender].batchNum != 0) {
             settle(msg.sender);
         }
