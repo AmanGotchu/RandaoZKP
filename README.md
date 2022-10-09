@@ -1,7 +1,7 @@
 # EthBogota Hackathon October 2022 - on chain verification of block hashes
 
 ## Motivation
-Valid historical block hashes are flexible for attestations - they characterize block headers which include (among other things) the `state trie` root, which can be used to make claims about historical state.  For concreteness our project brings `RanDAO` values in the `mixHash` block header for on-chain RNG generation, but many downstream applications can benefit from having a validated registry of block hashes.
+Block hashes commit to a lot - they summarize block headers which include, for example, the `state trie` root, which can be used to make claims about historical state.  Our project uses SNARKs to prove `blocknumber: blockhash` values on chain.  For concreteness we focus on `RanDAO` values in the `mixHash` block header for on-chain RNG generation, but many downstream applications can benefit from having a validated registry of block hashes.
 
 On-chain randomness in ethereum is difficult because of potential manipulation via inclusion/exclusion by proposers and the transparent nature of the blockchain data and algorithms.  Many projects rely on Chainlink’s VRF as an external trusted source of randomness, but it can be time consuming to integrate and introduces external trust assumptions.
 
@@ -9,8 +9,8 @@ We can bring the beacon chain’s currently generated RanDAO values on chain.  I
 
 Recursive zk-SNARKs can provide succinct verification that the block header/RanDAO values attested to are correct by confirming they generate a sequence (of the expected length) of block headers up to some known recent block hash.
 
-This repository includes circom contracts for verifying block headers. Our simple demo circuit outputs the block hash for
-a given block header,.  We have work in progress to generate recursive zk-SNARKs for posting arbitrarily old block hashes in constant on chain compute/storage.
+This repository includes circom contracts for verifying block headers.  Our simple demo circuit outputs the block hash for
+a given block header, and we have work in progress to generate recursive zk-SNARKs for posting arbitrarily old block hashes in constant on chain compute/storage.  Due to circuit compilation we are unable to demonstrate the recursive proofs before the hackathon ends, but will update this repository when they are ready.
 
 ## Circom Circuits
 Consistent with block hash calcaultion, our circuits expect the block header [RLP](https://ethereum.org/en/developers/docs/data-structures-and-encoding/rlp/) to be encoded as a sequence of `1112` hex values, which are then hashed and then validated against the next block header's `parentHash` field.
