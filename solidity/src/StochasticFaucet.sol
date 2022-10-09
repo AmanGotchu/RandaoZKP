@@ -5,7 +5,6 @@ import "solmate/utils/SafeTransferLib.sol";
 
 import "./BlockHashRegistry.sol";
 
-error UnsettledBet();
 error Overallocated();
 error RandomnessNotFound();
 
@@ -18,6 +17,7 @@ contract StochasticFaucet {
         uint256 betSize;
     }
 
+    event BetSettled();
     event RngRequested(address entrant, uint256 desiredBlock);
 
     mapping(address => Bet) public bets;
@@ -37,7 +37,7 @@ contract StochasticFaucet {
 
     function join() public payable {
         if (bets[msg.sender].batchNum != 0) {
-            revert UnsettledBet();
+            settle(msg.sender);
         }
         allocated += msg.value;
         if (allocated > address(this).balance) {
@@ -66,6 +66,7 @@ contract StochasticFaucet {
             allocated -= batchToTotalBet[bet.batchNum];
             delete batchToTotalBet[bet.batchNum];
         }
+        emit BetSettled();
         delete bets[entrant];
     }
 
