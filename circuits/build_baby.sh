@@ -1,15 +1,15 @@
 #!/bin/bash
 
-PHASE1=../../circuits/powersOfTau28_hez_final_25.ptau
-BUILD_DIR=../build/sanity_base
-CIRCUIT_NAME=sanity_base
+PHASE1=/pot/powersOfTau28_hez_final_25.ptau
+BUILD_DIR=../build/baby
+CIRCUIT_NAME=baby_block
 
-# if [ -f "$PHASE1" ]; then
-#     echo "Found Phase 1 ptau file"
-# else
-#     echo "No Phase 1 ptau file found. Exiting..."
-#     exit 1
-# fi
+if [ -f "$PHASE1" ]; then
+    echo "Found Phase 1 ptau file"
+else
+    echo "No Phase 1 ptau file found. Exiting..."
+    exit 1
+fi
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "No build directory found. Creating build directory..."
@@ -20,7 +20,7 @@ echo $PWD
 
 echo "****COMPILING CIRCUIT****"
 start=`date +%s`
-circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
+circom baby_build.circom --O1 --wasm --r1cs --c --sym --output ../build/baby
 end=`date +%s`
 echo "DONE ($((end-start))s)"
 

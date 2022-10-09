@@ -15,9 +15,6 @@ template BabyBlockChecker() {
     // with nawlin's recursive zk snark project Isokratia example code in
     // https://github.com/nalinbhardwaj/circom-pairing/blob/082e7705a8a384e7c7568944fa216d3eb8d863ed/scripts/recursion/recursion.circom#L5
 
-    // bn254 curve property
-    var k2 = 6;
-
     // Input, RLP representation of the block.
     signal input blockRlpHexs[1112]; // 1112 bytes of RLP encoding
     // Outputs.
