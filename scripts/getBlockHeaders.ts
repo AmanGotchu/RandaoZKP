@@ -1,41 +1,24 @@
 import { ethers } from "ethers";
 import axios from "axios";
+import * as dotenv from 'dotenv'
+import fs from 'fs';
+
 // usage: $yarn ts-node getBlockHeaders.ts --blocknum 15705750
 var minimist = require("minimist");
 
 const RLP_LENGTH = 1112;
-const RPC_API_KEY = process.env.RPC_API_KEY;
-const RPC_URL = process.env.RPC_URL || "https://mainnet.infura.io/v3/";
 
-var args = minimist(process.argv.slice(2), {
-  number: ["blocknum"], // --blocknum 2398572498
-  boolean: ["is_base"],
-  default: { is_base: false },
-});
+const writeBlockHeaderRLP = async (blocknum: bigint) => {
+  dotenv.config({path: "../.env"});
+  let { RPC_URL, RPC_API_KEY } = process.env;
+  RPC_URL = RPC_URL || "https://mainnet.infura.io/v3/";
 
-const getBlockHeader = async (blockNumber: bigint | null) => {
-  return axios.post(`${RPC_URL}${RPC_API_KEY}`, {
+  const blockHeaderResp = await axios.post(`${RPC_URL}${RPC_API_KEY}`, {
     jsonrpc: "2.0",
     id: 0,
     method: "eth_getBlockByNumber",
-    params: [blockNumber ? "0x" + blockNumber.toString(16) : "latest", false],
+    params: [blocknum ? "0x" + blocknum.toString(16) : "latest", false],
   });
-};
-
-const getLatestBlock = async () => {
-  // if blocknum is null/unspecified, just latest
-  if (args.blocknum === null) {
-    console.log("setting default blocknum");
-    const latestBlock = await getBlockHeader(null);
-    console.log(JSON.stringify(latestBlock.data.result));
-    args.blocknum = latestBlock.data.result.number;
-    console.log(`set blocknum to latest ${args.blocknum}`);
-    return latestBlock;
-  }
-};
-
-const writeBlockHeaderRLP = async (blocknum: bigint) => {
-  const blockHeaderResp = await getBlockHeader(blocknum);
 
   let encoded = encodeRLP(blockHeaderResp);
   // super long string that looks like
@@ -61,7 +44,11 @@ const writeBlockHeaderRLP = async (blocknum: bigint) => {
   console.log(output);
   const jsonfile = require("jsonfile");
 
-  const file = `input_${blocknum}.json`;
+  const dir = `proofstuff_${blocknum}`;
+  if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir);
+  }
+  const file = `./proofstuff_${blocknum}/input_${blocknum}.json`;
 
   jsonfile.writeFile(file, output, function (err: any) {
     if (err) console.error(err);
@@ -148,4 +135,9 @@ const encodeRLP = (blockHeaderResp: any) => {
   return rlpEncodedHeader;
 };
 
+var args = minimist(process.argv.slice(2), {
+  number: ["blocknum"], // --blocknum 2398572498
+  boolean: ["is_base"],
+  default: { is_base: false },
+});
 writeBlockHeaderRLP(args.blocknum);
