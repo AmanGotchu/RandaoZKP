@@ -54,6 +54,9 @@ Block headers are preprocessed into an RLP encoded format prior to hashing. We p
 
 Complete the recursive zk-SNARKs so that arbitrary block hashes can be added onto the smart contract mapping. We expected circuit compilation times in excess of 24 hours, which prevented their readiness in time for the end of this hackathon.
 
+This code is unaudited and relies on code which is not considered production grade by its authors. Significant hardening is needed
+to prepare these contracts for production use, and we may want to consider alternative implementations using tools like [Noir/Plonk](https://medium.com/aztec-protocol/introducing-noir-the-universal-language-of-zero-knowledge-ff43f38d86d9#:~:text=Introducing%20Noir%3A%20The%20Universal%20Language,by%20Aztec%20Team&text=Aztec%20Network&text=Oct%2C%202022).
+
 # Acknowledgements
 
 We thank Nawlin and Yi Sun for extremely relevant open source circom circuits ([Isokratia](https://github.com/nalinbhardwaj/circom-pairing/tree/082e7705a8a384e7c7568944fa216d3eb8d863ed) and [circom-pairing](https://github.com/yi-sun/circom-pairing).
@@ -80,3 +83,7 @@ Because of the commit-reveal scheme, one valid random number is generated each e
 We are fortunate that RanDAO values are present in the block header, so our circuit only has to prove that the block header values hash to the known block hashes. There are no merkle/patricia proofs against state/transaction tries. It is straightforward to naively recurse from block to block, because the previous block hash is present in the current block’s header. After PoS, the PoW `mixHash` header value has been replaced with the current `RanDAO` value.
 
 Our (wip) recursive zk-SNARKs check that our claimed block header values hash (recursively) up until some recent known valid block hash that is available on chain. If we are able to provide a chain of block headers that satisfy this property, the hardness of SHA256 justifies our claimed values are the true historical header values.
+
+### Recursive zk-SNARKS
+
+It may be helpful to read this [primer](https://www.michaelstraka.com/posts/recursivesnarks/) for those less familiar with recursive proofs.
