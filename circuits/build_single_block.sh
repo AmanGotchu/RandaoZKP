@@ -18,7 +18,7 @@ fi
 
 echo $PWD
 
-echo "****COMPILING CIRCUIT****"
+echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
 start=`date +%s`
 circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
 end=`date +%s`

@@ -25,9 +25,11 @@ template SingleEthBlockHashHex(publicInputCount) {
     signal output mixHash[64];
 
     // Decoding RLP input
+    /*
     for (var idx = 0; idx < 1112; idx++) {
         log(blockRlpHexs[idx]);
     }
+    */
 
     // thank you Yi
     component rlp = RlpArrayCheck(1112, 16, 4,
@@ -75,6 +77,7 @@ template SingleEthBlockHashHex(publicInputCount) {
     }
 
     // Logging decoded RLP values
+    /*
     for (var idx = 0; idx < 64; idx++) {
         log(currentHash[idx]);
     }
@@ -87,6 +90,7 @@ template SingleEthBlockHashHex(publicInputCount) {
     for (var idx = 0; idx < 64; idx++) {
         log(mixHash[idx]);
     }
+    */
  }
 
 component main = SingleEthBlockHashHex(1112);
