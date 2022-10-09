@@ -8,28 +8,27 @@ error InvalidAnchorHash(bytes32 anchorHash);
 
 contract BlockHashRegistry is Verifier {
     mapping(uint256 => bytes32) public numToHash;
-    mapping(bytes32 => uint256) public hashToNum;
+    mapping(uint256 => bytes32) public numToRandMix;
 
     constructor() {
-        // Hard-coding the first post-merge block.
-        // https://etherscan.io/block/15537393
-        setEntry(15537393, 0x55b11b918355b1ef9c5db810302ebad0bf2544255b530cdce90674d5887bb286);
-        poke(block.number - 1);
-        poke(block.number - 256);
+        poke();
     }
 
-    function setEntry(uint256 blockNum, bytes32 blockHash) internal {
-        assert(blockHash != bytes32(0));
+    function setEntry(
+        uint256 blockNum,
+        bytes32 blockHash,
+        bytes32 randMix
+    ) internal {
         numToHash[blockNum] = blockHash;
-        hashToNum[blockHash] = blockNum;
+        numToRandMix[blockNum] = randMix;
     }
 
     function poke() public {
-        poke(block.number - 1);
-    }
-
-    function poke(uint256 blockNum) public {
-        setEntry(blockNum, blockhash(blockNum));
+        setEntry(
+            block.number - 1,
+            blockhash(block.number - 1),
+            bytes32(block.difficulty)
+        );
     }
 
     function prove(
@@ -55,23 +54,23 @@ contract BlockHashRegistry is Verifier {
             parentHash <<= 4;
             parentHash |= bytes32(input[i]);
         }
-        // Next 6 are blockNumber.
-        bytes32 blockNum;
+        // Next 6 are parentBlockNum.
+        bytes32 parentBlockNumAccumulator;
         for (; i < 134; i++) {
-            blockNum <<= 4;
-            blockNum |= bytes32(input[i]);
+            parentBlockNumAccumulator <<= 4;
+            parentBlockNumAccumulator |= bytes32(input[i]);
         }
+        uint256 parentBlockNum = uint256(parentBlockNumAccumulator);
         // Next 64 are mixHash.
-        bytes32 mixHash;
+        bytes32 parentMixHash;
         for (; i < 198; i++) {
-            mixHash <<= 4;
-            mixHash |= bytes32(input[i]);
+            parentMixHash <<= 4;
+            parentMixHash |= bytes32(input[i]);
         }
         // Set the new hash.
-        uint256 provenBlockNum = hashToNum[anchorHash] - 1;
-        if (provenBlockNum == 0) {
+        if (numToHash[parentBlockNum + 1] != anchorHash) {
             revert InvalidAnchorHash(anchorHash);
         }
-        setEntry(provenBlockNum, parentHash);
+        setEntry(parentBlockNum, parentHash, parentMixHash);
     }
 }
