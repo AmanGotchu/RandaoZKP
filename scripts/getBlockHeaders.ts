@@ -1,12 +1,11 @@
 import { ethers } from "ethers";
 import axios from "axios";
-import { write } from "fs";
 // usage: $yarn ts-node getBlockHeaders.ts --blocknum 15705750
 var minimist = require("minimist");
 
 const RLP_LENGTH = 1112;
-const RPC_API_KEY = "b21f394fcb224f8781403d4bf6caf604";
-const RPC_URL = "https://mainnet.infura.io/v3/";
+const RPC_API_KEY = process.env.RPC_API_KEY;
+const RPC_URL = process.env.RPC_URL || "https://mainnet.infura.io/v3/";
 
 var args = minimist(process.argv.slice(2), {
   number: ["blocknum"], // --blocknum 2398572498
