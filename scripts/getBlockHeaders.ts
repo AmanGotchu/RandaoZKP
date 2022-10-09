@@ -8,7 +8,7 @@ var minimist = require("minimist");
 
 const RLP_LENGTH = 1112;
 
-const writeBlockHeaderRLP = async (blocknum: bigint) => {
+export const writeBlockHeaderRLP = async (blocknum: number) => {
   dotenv.config({path: "../.env"});
   let { RPC_URL, RPC_API_KEY } = process.env;
   RPC_URL = RPC_URL || "https://mainnet.infura.io/v3/";
@@ -134,10 +134,3 @@ const encodeRLP = (blockHeaderResp: any) => {
 
   return rlpEncodedHeader;
 };
-
-var args = minimist(process.argv.slice(2), {
-  number: ["blocknum"], // --blocknum 2398572498
-  boolean: ["is_base"],
-  default: { is_base: false },
-});
-writeBlockHeaderRLP(args.blocknum);
