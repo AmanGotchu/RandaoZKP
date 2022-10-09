@@ -1,6 +1,6 @@
 #!/bin/bash
 
-compile_r1cs=false
+# example usage: $BUILD_DIR=../build/ ./build_single_block.sh
 
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
@@ -15,7 +15,7 @@ fi
 
 echo $PWD
 
-if [ "$compile_r1cs" = true ]; then
+if [ -f "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs ]; then
     echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
     start=`date +%s`
     circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
