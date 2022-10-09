@@ -3,8 +3,6 @@
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
 CIRCUIT_NAME=singleBlockHeader
-VKEY=/
-
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "No build directory found. Creating build directory..."
