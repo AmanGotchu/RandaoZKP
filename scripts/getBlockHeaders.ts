@@ -132,3 +132,4 @@ const encodeRLP = (blockHeaderResp: any) => {
 
   return rlpEncodedHeader;
 };
+
