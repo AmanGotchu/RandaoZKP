@@ -1,5 +1,10 @@
 pragma circom 2.0.2;
 
+include "../circom-pairing/node_modules/circomlib/circuits/bitify.circom";
+include "../circom-pairing/node_modules/circomlib/circuits/comparators.circom";
+include "../circom-pairing/node_modules/circomlib/circuits/multiplexer.circom";
+include "../circom-pairing/circuits/bn254/groth16.circom";
+
 include "./utils/keccak.circom";
 include "./utils/rlp.circom";
 include "./utils/mpt.circom";
@@ -16,7 +21,7 @@ template SingleEthBlockHashHex(publicInputCount) {
     // i have no idea why though.
     signal output currentHash[64];
     signal output parentHash[64];
-    signal output blockNumber;
+    signal output blockNumber[6];
     signal output mixHash[64];
 
     // Decoding RLP input
@@ -65,18 +70,16 @@ template SingleEthBlockHashHex(publicInputCount) {
         parentHash[idx] <== rlp.fields[0][idx];
         mixHash[idx] <== rlp.fields[13][idx];
     }
-    numberHexLen <== rlp.fieldHexLen[8];
     for (var idx = 0; idx < 6; idx++) {
-        number[idx] <== rlp.fields[8][idx];
+        blockNumber[idx] <== rlp.fields[8][idx];
     }
 
     // Logging decoded RLP values
     for (var idx = 0; idx < 64; idx++) {
-        log(blockHashHexs[idx]);
+        log(currentHash[idx]);
     }
-    log(numberHexLen);
     for (var idx = 0; idx < 6; idx++) {
-        log(number[idx]);
+        log(blockNumber[idx]);
     }
     for (var idx = 0; idx < 64; idx++) {
         log(parentHash[idx]);
