@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# example usage: $BUILD_DIR=../build/ ./build_single_block.sh
+
 PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=$BUILD_DIR
 TRUSTED_SETUP_DIR=../trusted_setup/
@@ -13,11 +15,13 @@ fi
 
 echo $PWD
 
-echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
-start=`date +%s`
-circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
-end=`date +%s`
-echo "DONE ($((end-start))s)"
+if [ -f "$BUILD_DIR"/"$CIRCUIT_NAME".r1cs ]; then
+    echo "**** COMPILING CIRCUIT $CIRCUIT_NAME.circom ****"
+    start=`date +%s`
+    circom "$CIRCUIT_NAME".circom --O1 --r1cs --wasm --c --sym --output "$BUILD_DIR"
+    end=`date +%s`
+    echo "DONE ($((end-start))s)"
+fi
 
 echo "****GENERATING WITNESS FOR SAMPLE INPUT****"
 start=`date +%s`
@@ -44,7 +48,7 @@ if test ! -f "$TRUSTED_SETUP_DIR/vkey.json"; then
 
     echo "****GENERATING FINAL ZKEY****"
     start=`date +%s`
-    NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey beacon "$BUILD_DIR"/"$CIRCUIT_NAME"_0.zkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey 0102030405060708090a0b0c0d0e0f101112231415161718221a1b1c1d1e1f 10 -n="Final Beacon phase2"
+    NODE_OPTIONS="--max-old-space-size=56000" npx snarkjs zkey beacon "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME"_0.zkey "$TRUSTED_SETUP_DIR"/"$CIRCUIT_NAME".zkey 0102030405060708090a0b0c0d0e0f101112231415161718221a1b1c1d1e1f 10 -n="Final Beacon phase2"
     end=`date +%s`
     echo "DONE ($((end-start))s)"
 
