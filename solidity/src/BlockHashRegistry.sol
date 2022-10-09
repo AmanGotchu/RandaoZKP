@@ -74,3 +74,4 @@ contract BlockHashRegistry is Verifier {
         setEntry(parentBlockNum, parentHash, parentMixHash);
     }
 }
+
