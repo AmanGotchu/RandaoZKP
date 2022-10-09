@@ -23,4 +23,5 @@ public.json
 # Random
 .DS_Store
 .vscode/
+.env
 build

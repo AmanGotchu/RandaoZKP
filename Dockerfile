@@ -41,6 +41,8 @@ COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 COPY . .
 
+RUN npm i -g snarkjs@0.5.0
+
 RUN mkdir build
 
 EXPOSE 8080

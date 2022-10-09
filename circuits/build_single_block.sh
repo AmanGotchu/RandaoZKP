@@ -1,15 +1,9 @@
 #!/bin/bash
 
-PHASE1=powersOfTau28_hez_final_25.ptau
+PHASE1=/powers-of-tau/powersOfTau28_hez_final_25.ptau
 BUILD_DIR=../build/simple
 CIRCUIT_NAME=singleBlockHeader
 
-# if [ -f "$PHASE1" ]; then
-#     echo "Found Phase 1 ptau file"
-# else
-#     echo "No Phase 1 ptau file found. Exiting..."
-#     exit 1
-# fi
 
 if [ ! -d "$BUILD_DIR" ]; then
     echo "No build directory found. Creating build directory..."
@@ -32,9 +26,14 @@ node "$BUILD_DIR"/"$CIRCUIT_NAME"_js/generate_witness.js \
 end=`date +%s`
 echo "DONE ($((end-start))s)"
 
-# TODO(sina) everything below this)
+if [ -f "$PHASE1" ]; then
+    echo "Found Phase 1 ptau file"
+else
+    echo "No Phase 1 ptau file found. Exiting..."
+    exit 1
+fi
+
 # these need powers of tau...
-exit 0
 
 echo "****GENERATING ZKEY 0****"
 start=`date +%s`

@@ -32,7 +32,7 @@
         "axios": "^1.1.2",
         "circomlib": "^2.0.2",
         "ethers": "^5.7.1",
-        "snarkjs": "^0.4.10"
+        "snarkjs": "^0.5.0"
     },
     "devDependencies": {
         "@noble/bls12-381": "^1.2.0",
