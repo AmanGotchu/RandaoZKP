@@ -57,6 +57,8 @@ Complete the recursive zk-SNARKs so that arbitrary block hashes can be added ont
 This code is unaudited and relies on code which is not considered production grade by its authors. Significant hardening is needed
 to prepare these contracts for production use, and we may want to consider alternative implementations using tools like [Noir/Plonk](https://medium.com/aztec-protocol/introducing-noir-the-universal-language-of-zero-knowledge-ff43f38d86d9#:~:text=Introducing%20Noir%3A%20The%20Universal%20Language,by%20Aztec%20Team&text=Aztec%20Network&text=Oct%2C%202022).
 
+Our Groth16 based proof unfortunately introduces an additional trusted setup, which has had no external participants. This will need to be addressed for actual deployment.
+
 # Acknowledgements
 
 We thank Nawlin and Yi Sun for extremely relevant open source circom circuits ([Isokratia](https://github.com/nalinbhardwaj/circom-pairing/tree/082e7705a8a384e7c7568944fa216d3eb8d863ed) and [circom-pairing](https://github.com/yi-sun/circom-pairing).
