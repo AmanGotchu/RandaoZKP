@@ -1,7 +1,7 @@
 # EthBogota Hackathon October 2022 - on chain verification of block hashes
 
 ## Motivation
-On-chain randomness in ethereum is difficult because of potential manipulation via inclusion/exclusion by proposers and the transparent nature of the blockchain data and algorithms.  Many projects rely on Chainlink’s VRF as an external trusted source of randomness, but it is painful to integrate and introduces external trust assumptions.
+On-chain randomness in ethereum is difficult because of potential manipulation via inclusion/exclusion by proposers and the transparent nature of the blockchain data and algorithms.  Many projects rely on Chainlink’s VRF as an external trusted source of randomness, but it can be time consuming to integrate and introduces external trust assumptions.
 
 We propose bringing the beacon chain’s existing RanDAO RNG values on chain.  In future work, our contract will provide numbers uniformly distributed in the interval (0, 1) based on commitments to *future* RanDAO values.  For this particular application, only one value/block hash needs to be committed per epoch.
 
@@ -28,19 +28,23 @@ An immediate application is re-using the RanDAO RNG seed generation from the bea
 off chain integrations.  This can be done by having smart contracts commit to future values of RanDAO (possibly with a Verifiable Delay Function on top),
 which is effectively ungameable despite the known "k-bits" biasability of the beacon chain's implementation of RanDAO.
 
-## Install Instructions
+## Instructions
 
-To use our files, you will have to
+To use our code to generate and verify block hashes, you will have to
 
 (1) Copy `.env_` into `.env` and set the environment variable `RPC_API_KEY=""` and `RPC_URL` to your preferred RPC provider. We have tested our scripts with Infura.
 
-(2) We assume that the universal trusted setup powers of tau file has been downloaded and mounted/placed in
-`/powers-of-tau/powersOfTau28_hez_final_25.ptau`. this is configurable in `circuits/build_single_block.sh`.
+(2) We assume that the [universal trusted setup powers of tau file](https://github.com/weijiekoh/perpetualpowersoftau) has been downloaded and mounted/placed in
+`/powers-of-tau/powersOfTau28_hez_final_25.ptau`. this is configurable in `circuits/build_single_block.sh`, which compiles the circom circuits and generates/validates an example proof for block `15705750`.
+
+(3) optional - use our provided [Dockerfile](Dockerfile) to run the code with necessary requirements.  It may be helpful to create a dedicated volume with the powers of tau file and mount it onto the runtime.
 
 ## Block Header Processing
 Block headers are preprocessed into an RLP encoded format prior to hashing.  We provide a script for generating blockheaders from an RPC provider in [scripts/getBlockHeaders.ts](scripts/getBlockHeaders.ts).
 
 ## TODO
+
+Complete the recursive zk-SNARKs so that arbitrary block hashes can be added onto the smart contract mapping.  We expected circuit compilation times in excess of 24 hours, which prevented their readiness in time for the end of this hackathon.
 
 ## Related Projects
 
