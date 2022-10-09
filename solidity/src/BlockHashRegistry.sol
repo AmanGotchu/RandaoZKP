@@ -8,7 +8,8 @@ contract BlockHashRegistry {
         // Hard-coding the first post-merge block.
         // https://etherscan.io/block/15537393
         hashes[15537393] = 0x55b11b918355b1ef9c5db810302ebad0bf2544255b530cdce90674d5887bb286;
-        hashes[block.number - 1] = blockhash(block.number - 1);
+        poke(block.number - 1);
+        poke(block.number - 256);
     }
 
     function poke() public {
@@ -17,12 +18,13 @@ contract BlockHashRegistry {
 
     function poke(uint256 blockNum) public {
         bytes32 pokeHash = blockhash(blockNum);
+        assert(pokeHash != bytes32(0));
         hashes[blockNum] = pokeHash;
     }
 
     // TODO(sina) the params to this fn should map to the verifier's input
     function prove() public {
-        // TODO(sina) get stuff;
+        // TODO(sina) do proof verification stuff here
         hashes[0] = bytes32(0);
     }
 }
