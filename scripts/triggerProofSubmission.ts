@@ -55,7 +55,7 @@ export const triggerProofSubmission = async (blockNum: number) => {
     const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
     const signer = new ethers.Wallet("0x93bf309c2c473731ce11cb548b8986c19660e81f70459b6150b20b55f5413f1a", provider);
     const verifierContract = new ethers.Contract(
-        "0x948279128B8F7b62cb9C6Bfce0905aFba9cbd116",
+        process.env.VERIFIER_CONTRACT_ADDRESS!,
         new ethers.utils.Interface([
             `function prove(uint256[2] memory a, uint256[2][2] memory b, uint256[2] memory c, uint256[198] memory input) public`,
             `function poke() public`
