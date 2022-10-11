@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import axios from "axios";
 import fs from 'fs';
+import * as dotenv from 'dotenv';
 
 // usage: $yarn ts-node getBlockHeaders.ts --blocknum 15705750
 var minimist = require("minimist");
@@ -8,14 +9,18 @@ var minimist = require("minimist");
 const RLP_LENGTH = 1112;
 
 export const writeBlockHeaderRLP = async (blocknum: number) => {
-  let { RPC_URL, RPC_API_KEY } = process.env;
-  RPC_URL = RPC_URL || "https://mainnet.infura.io/v3/";
+  dotenv.config({
+    path: "../.env"
+  })
 
-  const blockHeaderResp = await axios.post(`${RPC_URL}${RPC_API_KEY}`, {
+  let { RPC_URL } = process.env;
+
+  const blockHeaderResp = await axios.post(RPC_URL!, {
     jsonrpc: "2.0",
     id: 0,
     method: "eth_getBlockByNumber",
-    params: [blocknum ? "0x" + blocknum.toString(16) : "latest", false],
+    params: [
+      blocknum ? "0x" + blocknum.toString(16) : "latest", false],
   });
 
   let encoded = encodeRLP(blockHeaderResp);
@@ -26,17 +31,18 @@ export const writeBlockHeaderRLP = async (blocknum: number) => {
 
   // remove 0x prefix
   encoded = encoded.replace("0x", "");
+  const rlpHexEncoded = [...encoded].map((char) => parseInt(char, 16));
 
-  const padLen = 1112 - encoded.length;
+  const padLen = 1112 - rlpHexEncoded.length;
+  for (let i = 0; i<padLen; i++)
   if (padLen > 0) {
-    encoded += "0".repeat(padLen);
+    rlpHexEncoded.push(0);
   }
 
-  const rlpHexEncoded = [...encoded].map((char) => parseInt(char, 16));
-  console.log(`length is ${rlpHexEncoded.length}`);
+  console.log(`final length is ${rlpHexEncoded.length}`);
 
   const output = {
-    rlpHexEncoded: rlpHexEncoded,
+    blockRlpHexs: rlpHexEncoded,
     //    baseBit: args.is_base ? 1 : 0,
   };
   console.log(output);
@@ -46,12 +52,9 @@ export const writeBlockHeaderRLP = async (blocknum: number) => {
   if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
   }
-  const file = `./proofstuff_${blocknum}/input_${blocknum}.json`;
+  const file = `./proofstuff_${blocknum}/input.json`;
 
-  jsonfile.writeFile(file, output, function (err: any) {
-    if (err) console.error(err);
-  });
-
+  jsonfile.writeFileSync(file, output);
   return;
 };
 
@@ -95,7 +98,7 @@ const encodeRLP = (blockHeaderResp: any) => {
     nonce,
   };
 
-  const LONDON_HARDFORK_BLOCK = 12965000;
+  const LONDON_HARDFORK_BLOCK = 5062605; // Goerli
   if (number > LONDON_HARDFORK_BLOCK) {
     blockHeaderInputs["baseFeePerGas"] = baseFeePerGas;
   }
@@ -104,7 +107,7 @@ const encodeRLP = (blockHeaderResp: any) => {
     let val = blockHeaderInputs[key];
 
     // All 0 values for these fields must be 0x
-    if (["gasLimit", "gasUsed", "time", "difficulty", "number"].includes(key)) {
+    if (["gasLimit", "gasUsed", "timestamp", "difficulty", "number"].includes(key)) {
       if (parseInt(val, 16) === 0) {
         val = "0x";
       }
@@ -129,7 +132,9 @@ const encodeRLP = (blockHeaderResp: any) => {
   console.log("Mix hash", mixHash);
   console.log("RLP Derived Block Hash", derivedBlockHash);
   console.log("Actual Block Hash", hash);
+  if (derivedBlockHash !== hash) {
+    throw new Error(`Derived ${derivedBlockHash} doesn't match expected ${hash}`);
+  }
 
   return rlpEncodedHeader;
 };
-

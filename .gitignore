@@ -7,15 +7,20 @@ out
 # Compilation
 main_js/
 main.r1cs
+compiled_circuit/
 
 # Witness Generation
 witness.wtns
+
+# Proof Stuff
+scripts/proofstuff_*/
 
 # Trusted setup
 pot24_final.ptau
 powersOfTau28_hez_final_25.ptau
 blockheader_0000.zkey
 blockheader_0001.zkey
+singleBlockHeader.zkey
 verification_key.json
 
 # Random

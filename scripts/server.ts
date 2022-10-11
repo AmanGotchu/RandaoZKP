@@ -1,4 +1,4 @@
-import { poke } from "./triggerProofSubmission";
+import { poke, triggerProofSubmission } from "./triggerProofSubmission";
 import * as dotenv from 'dotenv'
 
 const express = require('express')
@@ -13,12 +13,11 @@ app.get('/generateProof', async (req: any, res: any) => {
   try {
     console.log("Poking block");
     const tx = await poke();
-    const existingBlockNumber = tx.blockNumber;
-    console.log("Block number poked", tx.blockNumber);
+    const blockToProve = tx.blockNumber;
+    console.log("Block number poked", blockToProve);
 
-    const blockToProve = existingBlockNumber-1;
-    console.log(`Generating prove for block ${blockToProve}`)
-    await 
+    console.log(`Generating proof for block ${blockToProve}`)
+    await triggerProofSubmission(blockToProve);
 
     res.status(200).send(`Successfully proved block ${blockToProve}`)
   } catch (err) {
